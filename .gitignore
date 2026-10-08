@@ -1,0 +1,10 @@
+.env*
+!.env.example
+node_modules/
+out/
+cache/
+broadcast/
+.next/
+coverage/
+lcov.info
+.DS_Store
