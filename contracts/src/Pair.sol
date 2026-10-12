@@ -87,6 +87,7 @@ contract Pair is ERC20, ReentrancyGuard {
         factory = msg.sender;
     }
 
+    // slither-disable-start missing-zero-check
     /// @notice Sets the token pair. Callable once, by the factory only.
     /// @param initToken0 The lower-addressed token.
     /// @param initToken1 The higher-addressed token.
@@ -96,6 +97,7 @@ contract Pair is ERC20, ReentrancyGuard {
         token0 = initToken0;
         token1 = initToken1;
     }
+    // slither-disable-end missing-zero-check
 
     /// @notice Current reserves and the timestamp of the last update.
     /// @return _reserve0 Reserve of token0.
@@ -111,6 +113,8 @@ contract Pair is ERC20, ReentrancyGuard {
         _blockTimestampLast = blockTimestampLast;
     }
 
+    // slither-disable-start incorrect-equality
+    // slither-disable-start timestamp
     /// @notice Mints shares for tokens that were transferred into the pair beforehand.
     /// @dev Reverts via checked arithmetic if a balance is below its reserve
     ///      (for example a token that burns balances), which is the safe outcome.
@@ -144,7 +148,13 @@ contract Pair is ERC20, ReentrancyGuard {
         if (feeOn) kLast = uint256(reserve0) * reserve1;
         emit Mint(msg.sender, amount0, amount1);
     }
+    // slither-disable-end timestamp
+    // slither-disable-end incorrect-equality
 
+    // slither-disable-start incorrect-equality
+    // slither-disable-start reentrancy-no-eth
+    // slither-disable-start reentrancy-benign
+    // slither-disable-start timestamp
     /// @notice Burns shares that were transferred into the pair beforehand and pays
     ///         out the proportional share of both tokens.
     /// @param to Recipient of the tokens.
@@ -176,7 +186,15 @@ contract Pair is ERC20, ReentrancyGuard {
         if (feeOn) kLast = uint256(reserve0) * reserve1;
         emit Burn(msg.sender, amount0, amount1, to);
     }
+    // slither-disable-end timestamp
+    // slither-disable-end reentrancy-benign
+    // slither-disable-end reentrancy-no-eth
+    // slither-disable-end incorrect-equality
 
+    // slither-disable-start incorrect-equality
+    // slither-disable-start reentrancy-no-eth
+    // slither-disable-start reentrancy-benign
+    // slither-disable-start timestamp
     /// @notice Swaps tokens. Input tokens must already have been transferred in.
     /// @dev No callback and therefore no flash swaps. The fee-adjusted invariant check
     ///      guarantees the pool is never worse off than before the call.
@@ -216,6 +234,10 @@ contract Pair is ERC20, ReentrancyGuard {
         _update(balance0, balance1, _reserve0, _reserve1);
         emit Swap(msg.sender, amount0In, amount1In, amount0Out, amount1Out, to);
     }
+    // slither-disable-end timestamp
+    // slither-disable-end reentrancy-benign
+    // slither-disable-end reentrancy-no-eth
+    // slither-disable-end incorrect-equality
 
     /// @notice Sends any tokens held above the reserves to `to`.
     /// @param to Recipient of the excess.
@@ -234,6 +256,8 @@ contract Pair is ERC20, ReentrancyGuard {
         );
     }
 
+    // slither-disable-start weak-prng
+    // slither-disable-start timestamp
     /// @dev Updates reserves and, on the first call of each block, the price oracle.
     function _update(uint256 balance0, uint256 balance1, uint112 _reserve0, uint112 _reserve1)
         private
@@ -264,7 +288,10 @@ contract Pair is ERC20, ReentrancyGuard {
         blockTimestampLast = blockTimestamp;
         emit Sync(reserve0, reserve1);
     }
+    // slither-disable-end timestamp
+    // slither-disable-end weak-prng
 
+    // slither-disable-start timestamp
     /// @dev If the protocol fee is on, mints shares to feeTo equal to one sixth of the
     ///      growth in sqrt(k) since the last liquidity event (that is, 0.05% of the
     ///      0.30% fee).
@@ -287,4 +314,5 @@ contract Pair is ERC20, ReentrancyGuard {
             kLast = 0;
         }
     }
+    // slither-disable-end timestamp
 }

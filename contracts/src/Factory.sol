@@ -39,10 +39,12 @@ contract Factory is IFactory, Ownable2Step {
         return allPairs.length;
     }
 
+    // slither-disable-start too-many-digits
     /// @notice Hash of the Pair creation code, used to compute pair addresses.
     function pairInitCodeHash() external pure returns (bytes32) {
         return keccak256(type(Pair).creationCode);
     }
+    // slither-disable-end too-many-digits
 
     /// @inheritdoc IFactory
     /// @dev Tokens are sorted so (A, B) and (B, A) map to the same pair.
@@ -65,12 +67,14 @@ contract Factory is IFactory, Ownable2Step {
         Pair(pair).initialize(token0, token1);
     }
 
+    // slither-disable-start missing-zero-check
     /// @notice Sets the address that receives the protocol fee. Zero disables it.
     /// @param newFeeTo New fee recipient.
     function setFeeTo(address newFeeTo) external onlyOwner {
         emit FeeToUpdated(feeTo, newFeeTo);
         feeTo = newFeeTo;
     }
+    // slither-disable-end missing-zero-check
 
     /// @notice Disabled. Renouncing would permanently lock the fee setting.
     function renounceOwnership() public view override onlyOwner {

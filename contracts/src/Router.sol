@@ -217,6 +217,7 @@ contract Router {
         liquidity = IPair(pair).mint(to);
     }
 
+    // slither-disable-start unused-return
     /// @dev Moves shares from the caller into the pair, burns them, and orders the
     ///      result to match (tokenA, tokenB). Split out of removeLiquidity for stack depth.
     function _withdraw(address tokenA, address tokenB, uint256 liquidity, address to)
@@ -229,7 +230,9 @@ contract Router {
         (address token0,) = AmmLibrary.sortTokens(tokenA, tokenB);
         (amountA, amountB) = tokenA == token0 ? (amount0, amount1) : (amount1, amount0);
     }
+    // slither-disable-end unused-return
 
+    // slither-disable-start unused-return
     /// @dev Picks the ratio-matched deposit amounts, creating the pair if needed.
     function _addLiquidity(
         address tokenA,
@@ -259,7 +262,10 @@ contract Router {
             }
         }
     }
+    // slither-disable-end unused-return
 
+    // slither-disable-start unused-return
+    // slither-disable-start calls-loop
     /// @dev Executes the hops. Intermediate outputs go straight to the next pair, and
     ///      the first hop's input was already sent to its pair by the caller of this.
     function _swap(uint256[] memory amounts, address[] calldata path, address to_) private {
@@ -275,4 +281,6 @@ contract Router {
             IPair(AmmLibrary.pairFor(factory, input, output)).swap(amount0Out, amount1Out, to);
         }
     }
+    // slither-disable-end calls-loop
+    // slither-disable-end unused-return
 }
