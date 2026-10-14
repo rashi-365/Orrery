@@ -39,3 +39,6 @@ export function getMarket(): Market {
   });
   return { deployment, tokens: deployment.tokens, pools };
 }
+
+/** Config-derived market, computed once: the deployment cannot change while the app runs. */
+export const MARKET: Market = getMarket();
