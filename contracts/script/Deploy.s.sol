@@ -199,7 +199,7 @@ contract Deploy is Script {
 
     function _tokensJson(Deployment memory d, TokenSpec[] memory specs)
         internal
-        view
+        pure
         returns (string memory out)
     {
         out = '  "tokens": [\n';
