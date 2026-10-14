@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { APP_NAME, APP_TAGLINE } from "@/config/app";
 import { NAV_ITEMS } from "@/config/nav";
 import { cx } from "@/lib/format";
+import { ConnectButton } from "./ConnectButton";
 import { Logo } from "./Logo";
 import { SearchBox } from "./SearchBox";
 import { Stat } from "./Stat";
@@ -58,8 +59,9 @@ export function TopBar() {
             <SearchBox />
           </div>
 
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-6">
             <Stat label="Total TVL" value={null} align="right" />
+            <ConnectButton />
           </div>
         </div>
       </div>
