@@ -1,3 +1,45 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html {
+    background-color: theme("colors.bg");
+  }
+
+  body {
+    @apply font-sans text-text antialiased;
+    font-variant-numeric: tabular-nums;
+  }
+
+  * {
+    border-color: theme("colors.line");
+    scrollbar-width: thin;
+    scrollbar-color: theme("colors.line-strong") transparent;
+  }
+
+  ::selection {
+    background-color: theme("colors.teal");
+    color: theme("colors.bg");
+  }
+
+  :focus-visible {
+    outline: 1px solid theme("colors.teal");
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
