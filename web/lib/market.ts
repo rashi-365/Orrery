@@ -42,3 +42,8 @@ export function getMarket(): Market {
 
 /** Config-derived market, computed once: the deployment cannot change while the app runs. */
 export const MARKET: Market = getMarket();
+
+/** Token lookup by address. */
+export const TOKENS_BY_ADDRESS: ReadonlyMap<Address, TokenConfig> = new Map(
+  MARKET.tokens.map((token): [Address, TokenConfig] => [token.address, token]),
+);
