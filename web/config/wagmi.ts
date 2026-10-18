@@ -13,7 +13,7 @@ const connectors =
 export const wagmiConfig = createConfig({
   chains: [foundry],
   connectors,
-  transports: { [foundry.id]: http(LOCAL_RPC_URL) },
+  transports: { [foundry.id]: http(LOCAL_RPC_URL, { batch: true }) },
   multiInjectedProviderDiscovery: false,
   ssr: true,
 });
