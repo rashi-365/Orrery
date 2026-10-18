@@ -138,7 +138,7 @@ function SwapForm({ router, tokens, initialFrom, initialTo }: SwapFormProps) {
       void refresh();
       setPhase({
         kind: "done",
-        message: `Approved exactly ${formatAmount(amountIn, inputToken.decimals)} ${inputToken.symbol} for the router.`,
+        message: `Approved exactly ${formatAmount(amountIn, inputToken.decimals)} ${inputToken.symbol} for the router. This is only an approval. Click the button again to continue.`,
         hash,
       });
     } catch (error) {
