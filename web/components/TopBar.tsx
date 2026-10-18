@@ -8,7 +8,7 @@ import { cx } from "@/lib/format";
 import { ConnectButton } from "./ConnectButton";
 import { Logo } from "./Logo";
 import { SearchBox } from "./SearchBox";
-import { Stat } from "./Stat";
+import { TotalTvl } from "./TotalTvl";
 
 function isActive(pathname: string, href: string): boolean {
   if (href === "/") return pathname === "/";
@@ -60,7 +60,7 @@ export function TopBar() {
           </div>
 
           <div className="ml-auto flex items-center gap-6">
-            <Stat label="Total TVL" value={null} align="right" />
+            <TotalTvl />
             <ConnectButton />
           </div>
         </div>
