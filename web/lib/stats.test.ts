@@ -98,6 +98,11 @@ function must<T>(value: T | undefined): T {
   return value;
 }
 
+function mustNumber(value: number | null): number {
+  if (value === null) throw new Error("expected a number");
+  return value;
+}
+
 const prices = computePrices(TOKENS, POOLS, RESERVES, "LUNA");
 
 function statsFor(windowSeconds: number): TokenStat[] {
@@ -190,12 +195,12 @@ test("the previous window is counted separately and swaps older than both window
 
 test("metricDeltaPct compares with the previous window and needs a baseline", () => {
   const stats = statsFor(3600);
-  approx(must(metricDeltaPct(pick(stats, "LUNA"), "volume")), -70);
+  approx(mustNumber(metricDeltaPct(pick(stats, "LUNA"), "volume")), -70);
   assert.equal(metricDeltaPct(pick(stats, "AAA"), "volume"), null);
-  approx(must(metricDeltaPct(pick(stats, "BBB"), "volume")), -100);
+  approx(mustNumber(metricDeltaPct(pick(stats, "BBB"), "volume")), -100);
 
   // AAA liquidity: 800 AAA at 2000 an hour ago is 800,000; it is 1,000,000 now.
-  approx(must(metricDeltaPct(pick(stats, "AAA"), "tvl")), 25);
+  approx(mustNumber(metricDeltaPct(pick(stats, "AAA"), "tvl")), 25);
   // LUNA sits in a pool with no earlier snapshot, so its baseline is unknown.
   assert.equal(metricDeltaPct(pick(stats, "LUNA"), "tvl"), null);
 
