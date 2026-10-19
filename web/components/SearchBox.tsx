@@ -68,7 +68,7 @@ export function SearchBox() {
         placeholder="SEARCH TOKENS OR POOLS"
         autoComplete="off"
         spellCheck={false}
-        className="w-full rounded border border-line bg-transparent py-2 pl-3 pr-24 font-mono text-data uppercase text-text placeholder:text-muted focus:border-teal focus:outline-none"
+        className="w-full rounded border border-line bg-transparent py-2 pl-3 pr-24 font-mono text-data uppercase text-text placeholder:text-muted focus:border-accent focus:outline-none"
       />
       <span className="pointer-events-none absolute right-2 top-1/2 flex -translate-y-1/2 items-center gap-1">
         <Kbd>/</Kbd>

@@ -29,7 +29,7 @@ type DataTableProps<Row> = {
 
 function SortArrow({ direction }: { readonly direction: SortDirection }) {
   return (
-    <svg width="8" height="8" viewBox="0 0 8 8" aria-hidden="true" className="text-teal">
+    <svg width="8" height="8" viewBox="0 0 8 8" aria-hidden="true" className="text-accent">
       <path d={direction === "asc" ? "M4 1 L7 6 L1 6 Z" : "M4 7 L7 2 L1 2 Z"} fill="currentColor" />
     </svg>
   );

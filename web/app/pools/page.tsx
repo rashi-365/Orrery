@@ -17,7 +17,7 @@ export default function PoolsPage({
         flush
         action={
           query !== "" ? (
-            <Link href="/pools" className="font-mono text-label uppercase text-teal">
+            <Link href="/pools" className="font-mono text-label uppercase text-accent">
               {`CLEAR "${query}"`}
             </Link>
           ) : undefined

@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Archivo, JetBrains_Mono } from "next/font/google";
 import { APP_NAME, APP_TAGLINE } from "@/config/app";
-import { GridBackdrop } from "@/components/GridBackdrop";
+import { StarField } from "@/components/StarField";
 import { Providers } from "@/components/Providers";
 import { StatusStrip } from "@/components/StatusStrip";
 import { TopBar } from "@/components/TopBar";
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#04070A",
+  themeColor: "#000000",
   colorScheme: "dark",
 };
 
@@ -34,7 +34,7 @@ export default function RootLayout({
     <html lang="en" className={`${archivo.variable} ${jetbrains.variable}`}>
       <body className="min-h-screen">
         <Providers>
-          <GridBackdrop />
+          <StarField />
           <div className="relative flex min-h-screen flex-col">
             <TopBar />
             <main className="flex-1 px-4 py-6 sm:px-6">{children}</main>

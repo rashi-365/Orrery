@@ -7,7 +7,7 @@ import { describeError } from "@/lib/errors";
 import { shortAddress } from "@/lib/format";
 
 const BUTTON =
-  "border border-line-strong px-3 py-2 font-mono text-label uppercase text-text transition-colors hover:border-teal hover:text-teal disabled:cursor-not-allowed disabled:text-muted";
+  "border border-line-strong px-3 py-2 font-mono text-label uppercase text-text transition-colors hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:text-muted";
 
 export function ConnectButton() {
   const { address, isConnected, chainId } = useAccount();
@@ -82,7 +82,7 @@ export function ConnectButton() {
               key={connector.uid}
               type="button"
               role="menuitem"
-              className="block w-full px-3 py-2 text-left font-mono text-label uppercase text-text hover:bg-bg hover:text-teal"
+              className="block w-full px-3 py-2 text-left font-mono text-label uppercase text-text hover:bg-bg hover:text-accent"
               onClick={() => {
                 connect({ connector });
                 setOpen(false);

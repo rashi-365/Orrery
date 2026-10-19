@@ -65,7 +65,7 @@ export function RankedPanel() {
       title={`Tokens ${MARKET.tokens.length}`}
       flush
       action={
-        <Link href="/tokens" className="font-mono text-label uppercase text-teal">
+        <Link href="/tokens" className="font-mono text-label uppercase text-accent">
           Explore all
         </Link>
       }
@@ -82,7 +82,7 @@ export function RankedPanel() {
               const next = METRICS.find((item) => item.id === event.target.value);
               if (next !== undefined) setMetric(next.id);
             }}
-            className="w-full appearance-none rounded border border-line bg-bg py-1.5 pl-3 pr-8 font-mono text-label uppercase text-text focus:border-teal focus:outline-none"
+            className="w-full appearance-none rounded border border-line bg-bg py-1.5 pl-3 pr-8 font-mono text-label uppercase text-text focus:border-accent focus:outline-none"
           >
             {METRICS.map((item) => (
               <option key={item.id} value={item.id} className="bg-bg text-text">
@@ -110,7 +110,7 @@ export function RankedPanel() {
               className={cx(
                 "border px-2 py-1 font-mono text-label uppercase",
                 windowKey === item
-                  ? "border-teal text-teal"
+                  ? "border-accent text-accent"
                   : "border-line text-muted hover:text-text",
               )}
             >

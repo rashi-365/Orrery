@@ -13,7 +13,7 @@ export function PhaseMessage({ phase }: { readonly phase: TxPhase }) {
 
   if (phase.kind === "working") {
     return (
-      <p aria-live="polite" className="font-mono text-label uppercase text-teal">
+      <p aria-live="polite" className="font-mono text-label uppercase text-accent">
         {`// ${phase.label}`}
       </p>
     );
@@ -28,7 +28,7 @@ export function PhaseMessage({ phase }: { readonly phase: TxPhase }) {
   }
   return (
     <p aria-live="polite" className="border border-line-strong px-3 py-2 font-mono text-data text-text">
-      <span className="text-teal">DONE // </span>
+      <span className="text-accent">DONE // </span>
       {phase.message}
       {phase.hash !== undefined && <span className="text-muted">{` ${shortAddress(phase.hash)}`}</span>}
     </p>

@@ -46,7 +46,7 @@ export function TopBar() {
                   aria-current={active ? "page" : undefined}
                   className={cx(
                     "border-b px-3 py-2 font-sans text-xs font-medium uppercase tracking-label transition-colors",
-                    active ? "border-teal text-text" : "border-transparent text-muted hover:text-text",
+                    active ? "border-accent text-text" : "border-transparent text-muted hover:text-text",
                   )}
                 >
                   {item.label}

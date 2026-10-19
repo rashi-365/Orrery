@@ -30,7 +30,7 @@ export function AmountInput({ id, label, value, onChange, readOnly = false, inva
           if (/^\d*\.?\d*$/.test(next)) onChange(next);
         }}
         className={`w-full rounded border bg-transparent px-3 py-2 text-right font-mono text-stat tabular-nums text-text placeholder:text-muted focus:outline-none ${
-          invalid ? "border-line-strong" : "border-line focus:border-teal"
+          invalid ? "border-line-strong" : "border-line focus:border-accent"
         }`}
       />
     </div>

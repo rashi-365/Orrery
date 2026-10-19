@@ -93,7 +93,7 @@ function PoolSelect({
           const match = pools.find((pool) => pool.address === event.target.value);
           if (match !== undefined) onChange(match.address);
         }}
-        className="w-full appearance-none rounded border border-line bg-bg py-2 pl-3 pr-8 font-sans text-sm font-semibold uppercase tracking-label text-text focus:border-teal focus:outline-none"
+        className="w-full appearance-none rounded border border-line bg-bg py-2 pl-3 pr-8 font-sans text-sm font-semibold uppercase tracking-label text-text focus:border-accent focus:outline-none"
       >
         {pools.map((pool) => (
           <option key={pool.address} value={pool.address} className="bg-bg text-text">
@@ -473,7 +473,7 @@ export function LiquidityForm({
             onClick={() => changeMode(item)}
             className={cx(
               "border py-2 font-mono text-label uppercase",
-              mode === item ? "border-teal text-teal" : "border-line text-muted hover:text-text",
+              mode === item ? "border-accent text-accent" : "border-line text-muted hover:text-text",
             )}
           >
             {item}
@@ -513,7 +513,7 @@ export function LiquidityForm({
                 className={cx(
                   "border px-2 py-1 font-mono text-label",
                   percentText === String(preset)
-                    ? "border-teal text-teal"
+                    ? "border-accent text-accent"
                     : "border-line text-muted hover:text-text",
                 )}
               >
@@ -534,7 +534,7 @@ export function LiquidityForm({
               onChange={(event) => {
                 if (/^\d{0,3}$/.test(event.target.value)) changePercent(event.target.value);
               }}
-              className="w-24 rounded border border-line bg-transparent px-2 py-1 font-mono text-label uppercase text-text placeholder:text-muted focus:border-teal focus:outline-none"
+              className="w-24 rounded border border-line bg-transparent px-2 py-1 font-mono text-label uppercase text-text placeholder:text-muted focus:border-accent focus:outline-none"
             />
           </div>
           {percentText !== "" && percent === null && (
@@ -617,7 +617,7 @@ export function LiquidityForm({
         type="button"
         disabled={action.disabled || busy}
         onClick={() => void action.run?.()}
-        className="w-full border border-teal py-3 font-sans text-sm font-semibold uppercase tracking-label text-teal transition-colors hover:bg-teal hover:text-bg disabled:cursor-not-allowed disabled:border-line disabled:bg-transparent disabled:text-muted"
+        className="w-full border border-accent py-3 font-sans text-sm font-semibold uppercase tracking-label text-accent transition-colors hover:bg-accent hover:text-bg disabled:cursor-not-allowed disabled:border-line disabled:bg-transparent disabled:text-muted"
       >
         {action.label}
       </button>

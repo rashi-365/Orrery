@@ -23,14 +23,28 @@
   }
 
   ::selection {
-    background-color: theme("colors.teal");
+    background-color: theme("colors.accent");
     color: theme("colors.bg");
   }
 
   :focus-visible {
-    outline: 1px solid theme("colors.teal");
+    outline: 1px solid theme("colors.accent");
     outline-offset: 2px;
   }
+}
+
+@keyframes star-twinkle {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.15;
+  }
+}
+
+.star-twinkle {
+  animation: star-twinkle 6s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {

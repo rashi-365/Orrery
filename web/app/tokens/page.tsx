@@ -17,7 +17,7 @@ export default function TokensPage({
         flush
         action={
           query !== "" ? (
-            <Link href="/tokens" className="font-mono text-label uppercase text-teal">
+            <Link href="/tokens" className="font-mono text-label uppercase text-accent">
               {`CLEAR "${query}"`}
             </Link>
           ) : undefined

@@ -22,7 +22,7 @@ export function TokenSelect({ id, label, tokens, value, onChange }: TokenSelectP
           const match = tokens.find((token) => token.address === event.target.value);
           if (match !== undefined) onChange(match.address);
         }}
-        className="w-full appearance-none rounded border border-line bg-bg py-2 pl-3 pr-8 font-sans text-sm font-semibold uppercase tracking-label text-text focus:border-teal focus:outline-none"
+        className="w-full appearance-none rounded border border-line bg-bg py-2 pl-3 pr-8 font-sans text-sm font-semibold uppercase tracking-label text-text focus:border-accent focus:outline-none"
       >
         {tokens.map((token) => (
           <option key={token.address} value={token.address} className="bg-bg text-text">

@@ -18,17 +18,18 @@ const config: Config = {
     colors: {
       transparent: "transparent",
       current: "currentColor",
-      bg: "#04070A",
-      surface: "#0A0F14",
-      line: "rgba(255, 255, 255, 0.08)",
-      "line-strong": "rgba(255, 255, 255, 0.16)",
-      text: "#E6EAEE",
-      muted: "#7B8794",
-      // Accent pair: teal is net receives, amber is net sends.
-      teal: "#3CC8E8",
+      // Pure black with neutral greys: no blue, no violet, anywhere.
+      bg: "#000000",
+      surface: "#060606",
+      line: "rgba(255, 255, 255, 0.10)",
+      "line-strong": "rgba(255, 255, 255, 0.22)",
+      text: "#E4E4E4",
+      muted: "#8C8C8C",
+      // White is the interface accent and the colour of net buying. Amber is net selling.
+      accent: "#FFFFFF",
       amber: "#F2A33A",
       // Deltas. Used only for numbers.
-      up: "#3FCF8E",
+      up: "#5BD16B",
       down: "#F0524F",
     },
     extend: {

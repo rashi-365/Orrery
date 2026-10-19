@@ -16,7 +16,7 @@ export function FeedStatus() {
     <span className="flex items-center gap-2 font-mono text-label uppercase text-muted">
       <span
         aria-hidden="true"
-        className={status === "live" ? "h-1.5 w-1.5 bg-teal" : "h-1.5 w-1.5 bg-muted"}
+        className={status === "live" ? "h-1.5 w-1.5 bg-accent" : "h-1.5 w-1.5 bg-muted"}
       />
       {label}
     </span>

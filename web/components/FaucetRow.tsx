@@ -46,7 +46,7 @@ export function FaucetRow({ token }: { readonly token: TokenConfig }) {
           type="button"
           disabled={!isConnected || wrongNetwork || busy}
           onClick={() => void claim()}
-          className="border border-line-strong px-3 py-1 font-mono text-label uppercase text-text hover:border-teal hover:text-teal disabled:cursor-not-allowed disabled:text-muted"
+          className="border border-line-strong px-3 py-1 font-mono text-label uppercase text-text hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:text-muted"
         >
           {`Claim ${FAUCET_WHOLE_TOKENS.toLocaleString("en-US")} ${token.symbol}`}
         </button>

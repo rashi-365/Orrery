@@ -31,7 +31,7 @@ export function SlippageControl({ value, onChange }: SlippageControlProps) {
               }}
               className={cx(
                 "border px-2 py-1 font-mono text-label",
-                active ? "border-teal text-teal" : "border-line text-muted hover:text-text",
+                active ? "border-accent text-accent" : "border-line text-muted hover:text-text",
               )}
             >
               {`${preset / 100}%`}
@@ -58,7 +58,7 @@ export function SlippageControl({ value, onChange }: SlippageControlProps) {
           }}
           className={cx(
             "w-24 rounded border bg-transparent px-2 py-1 font-mono text-label uppercase text-text placeholder:text-muted focus:outline-none",
-            customInvalid ? "border-line-strong" : "border-line focus:border-teal",
+            customInvalid ? "border-line-strong" : "border-line focus:border-accent",
           )}
         />
       </div>

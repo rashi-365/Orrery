@@ -275,7 +275,7 @@ function SwapForm({ router, tokens, initialFrom, initialTo }: SwapFormProps) {
           type="button"
           onClick={flip}
           aria-label="Swap the two tokens"
-          className="border border-line-strong p-2 text-muted hover:border-teal hover:text-teal"
+          className="border border-line-strong p-2 text-muted hover:border-accent hover:text-accent"
         >
           <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
             <path d="M3 1 V10 M3 10 L1 8 M3 10 L5 8 M9 11 V2 M9 2 L7 4 M9 2 L11 4" fill="none" stroke="currentColor" strokeWidth="1" />
@@ -342,7 +342,7 @@ function SwapForm({ router, tokens, initialFrom, initialTo }: SwapFormProps) {
         type="button"
         disabled={action.disabled || busy}
         onClick={() => void action.run?.()}
-        className="w-full border border-teal py-3 font-sans text-sm font-semibold uppercase tracking-label text-teal transition-colors hover:bg-teal hover:text-bg disabled:cursor-not-allowed disabled:border-line disabled:bg-transparent disabled:text-muted"
+        className="w-full border border-accent py-3 font-sans text-sm font-semibold uppercase tracking-label text-accent transition-colors hover:bg-accent hover:text-bg disabled:cursor-not-allowed disabled:border-line disabled:bg-transparent disabled:text-muted"
       >
         {action.label}
       </button>
