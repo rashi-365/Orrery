@@ -190,3 +190,19 @@ export function pruneSyncs(syncs: readonly SyncPoint[], cutoff: number): SyncPoi
 export function recentSwaps(swaps: readonly SwapEvent[], limit: number): SwapEvent[] {
   return swaps.slice(Math.max(0, swaps.length - limit)).reverse();
 }
+
+/** The newest swaps that involve a token, newest first. Input must be in time order. */
+export function recentSwapsForToken(
+  swaps: readonly SwapEvent[],
+  token: Address,
+  limit: number,
+): SwapEvent[] {
+  const result: SwapEvent[] = [];
+  for (let i = swaps.length - 1; i >= 0 && result.length < limit; i--) {
+    const swap = swaps[i];
+    if (swap !== undefined && (swap.tokenIn === token || swap.tokenOut === token)) {
+      result.push(swap);
+    }
+  }
+  return result;
+}

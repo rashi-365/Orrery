@@ -7,6 +7,7 @@ import {
   pruneSwaps,
   pruneSyncs,
   recentSwaps,
+  recentSwapsForToken,
   swapImpactBps,
   type PairLog,
   type SwapEvent,
@@ -212,4 +213,28 @@ test("recentSwaps returns the newest swaps first, limited", () => {
   );
   assert.equal(recentSwaps(swaps, 10).length, 5);
   assert.equal(recentSwaps([], 3).length, 0);
+});
+
+test("recentSwapsForToken returns the newest swaps that touch a token, newest first", () => {
+  const X: Address = `0x${"33".repeat(20)}`;
+  const Y: Address = `0x${"44".repeat(20)}`;
+  const swaps = [
+    makeSwap("s1", 1),
+    { ...makeSwap("s2", 2), tokenIn: T1, tokenOut: T0 },
+    makeSwap("s3", 3),
+    { ...makeSwap("s4", 4), tokenIn: X, tokenOut: Y },
+  ];
+  assert.deepEqual(
+    recentSwapsForToken(swaps, T0, 2).map((swap) => swap.id),
+    ["s3", "s2"],
+  );
+  assert.deepEqual(
+    recentSwapsForToken(swaps, T0, 10).map((swap) => swap.id),
+    ["s3", "s2", "s1"],
+  );
+  assert.deepEqual(
+    recentSwapsForToken(swaps, Y, 5).map((swap) => swap.id),
+    ["s4"],
+  );
+  assert.equal(recentSwapsForToken(swaps, `0x${"55".repeat(20)}`, 5).length, 0);
 });

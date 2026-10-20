@@ -4,6 +4,7 @@ import type { Address } from "viem";
 import type { Reserves } from "./amm";
 import type { SwapEvent, SyncPoint } from "./events";
 import {
+  computePoolStats,
   computePrices,
   computeTokenStats,
   computeTvl,
@@ -218,4 +219,29 @@ test("rankTokens sorts by the chosen metric and breaks ties by symbol", () => {
   assert.deepEqual(symbols("volume"), ["AAA", "LUNA", "BBB", "CCC"]);
   assert.deepEqual(symbols("tvl"), ["LUNA", "BBB", "AAA", "CCC"]);
   assert.deepEqual(symbols("swaps"), ["AAA", "LUNA", "BBB", "CCC"]);
+});
+
+test("computePoolStats reports liquidity, window volume and swap counts for each pool", () => {
+  const poolStats = computePoolStats({
+    tokens: TOKENS,
+    pools: POOLS,
+    reserves: RESERVES,
+    swaps: SWAPS,
+    prices,
+    now: NOW,
+    windowSeconds: 3600,
+  });
+  const find = (address: Address) => must(poolStats.find((stat) => stat.pool.address === address));
+
+  const a = find(PA.address);
+  approx(a.tvlUsd, 2_000_000);
+  approx(a.volumeUsd, 1500);
+  assert.equal(a.swaps, 2);
+
+  const b = find(PB.address);
+  approx(b.tvlUsd, 4_000_000);
+  assert.equal(b.volumeUsd, 0);
+  assert.equal(b.swaps, 0);
+
+  assert.equal(find(PC.address).tvlUsd, 0);
 });

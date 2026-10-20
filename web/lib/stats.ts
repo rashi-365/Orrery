@@ -307,3 +307,49 @@ export function rankTokens(stats: readonly TokenStat[], metric: Metric): TokenSt
     (a, b) => metricValue(b, metric) - metricValue(a, metric) || a.token.symbol.localeCompare(b.token.symbol),
   );
 }
+
+export type PoolStat = {
+  readonly pool: PoolMeta;
+  readonly tvlUsd: number;
+  readonly volumeUsd: number;
+  readonly swaps: number;
+};
+
+export type PoolStatsInput = Pick<
+  StatsInput,
+  "tokens" | "pools" | "reserves" | "swaps" | "prices" | "now" | "windowSeconds"
+>;
+
+/** Liquidity, window volume and swap count for every pool. */
+export function computePoolStats(input: PoolStatsInput): PoolStat[] {
+  const { tokens, pools, reserves, swaps, prices, now, windowSeconds } = input;
+  const tokenMap = new Map(tokens.map((token) => [token.address, token] as const));
+  const volume = new Map<Address, number>();
+  const counts = new Map<Address, number>();
+  const start = now - windowSeconds;
+
+  for (const swap of swaps) {
+    if (swap.timestamp <= start || swap.timestamp > now) continue;
+    counts.set(swap.pool, (counts.get(swap.pool) ?? 0) + 1);
+    const value = swapValueUsd(swap, tokenMap, prices);
+    if (value !== null) volume.set(swap.pool, (volume.get(swap.pool) ?? 0) + value);
+  }
+
+  return pools.map((pool): PoolStat => {
+    const poolReserves = reserves.get(pool.address);
+    let tvlUsd = 0;
+    if (poolReserves !== undefined) {
+      const sides: ReadonlyArray<readonly [Address, bigint]> = [
+        [pool.token0, poolReserves.reserve0],
+        [pool.token1, poolReserves.reserve1],
+      ];
+      for (const [address, raw] of sides) {
+        const token = tokenMap.get(address);
+        if (token === undefined) continue;
+        const value = tokenValueUsd(raw, token, prices);
+        if (value !== null) tvlUsd += value;
+      }
+    }
+    return { pool, tvlUsd, volumeUsd: volume.get(pool.address) ?? 0, swaps: counts.get(pool.address) ?? 0 };
+  });
+}
