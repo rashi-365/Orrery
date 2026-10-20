@@ -3,9 +3,11 @@
 import { useQueryClient } from "@tanstack/react-query";
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -37,12 +39,16 @@ const PAIR_EVENTS = parseAbi([
 
 export type FeedStatus = "connecting" | "live" | "offline";
 
+type SwapListener = (swaps: readonly SwapEvent[]) => void;
+
 type MarketData = {
   readonly swaps: readonly SwapEvent[];
   readonly syncs: readonly SyncPoint[];
   readonly status: FeedStatus;
   /** Current time in epoch seconds, ticking once a second. Zero until the page has mounted. */
   readonly now: number;
+  /** Calls the listener with each batch of swaps that arrives after the first load. */
+  readonly subscribe: (listener: SwapListener) => () => void;
 };
 
 const MarketDataContext = createContext<MarketData>({
@@ -50,6 +56,7 @@ const MarketDataContext = createContext<MarketData>({
   syncs: [],
   status: "connecting",
   now: 0,
+  subscribe: () => () => undefined,
 });
 
 export function useMarketData(): MarketData {
@@ -69,6 +76,13 @@ export function MarketDataProvider({ children }: { readonly children: ReactNode 
   const [syncs, setSyncs] = useState<readonly SyncPoint[]>([]);
   const [status, setStatus] = useState<FeedStatus>("connecting");
   const [now, setNow] = useState(0);
+  const listeners = useRef(new Set<SwapListener>());
+  const subscribe = useCallback((listener: SwapListener) => {
+    listeners.current.add(listener);
+    return () => {
+      listeners.current.delete(listener);
+    };
+  }, []);
 
   useEffect(() => {
     setNow(Math.floor(Date.now() / 1000));
@@ -86,6 +100,8 @@ export function MarketDataProvider({ children }: { readonly children: ReactNode 
     let cancelled = false;
     let timer: ReturnType<typeof setTimeout> | undefined;
     let knownIds = new Set<string>();
+    // False during the first backfill, so listeners only hear about swaps that happen live.
+    let live = false;
     const cursor: { next: bigint | undefined; hash: Hex | undefined } = {
       next: undefined,
       hash: undefined,
@@ -98,6 +114,7 @@ export function MarketDataProvider({ children }: { readonly children: ReactNode 
     const reset = (): void => {
       cursor.next = undefined;
       cursor.hash = undefined;
+      live = false;
       knownIds = new Set<string>();
       setSwaps([]);
       setSyncs([]);
@@ -171,6 +188,9 @@ export function MarketDataProvider({ children }: { readonly children: ReactNode 
       const cutoff = Math.floor(Date.now() / 1000) - RETENTION_SECONDS;
       setSwaps((previous) => pruneSwaps([...previous, ...freshSwaps], cutoff));
       setSyncs((previous) => pruneSyncs([...previous, ...freshSyncs], cutoff));
+      if (live && freshSwaps.length > 0) {
+        listeners.current.forEach((listener) => listener(freshSwaps));
+      }
       return true;
     };
 
@@ -209,6 +229,7 @@ export function MarketDataProvider({ children }: { readonly children: ReactNode 
       const head = await client.getBlock({ blockNumber: latest });
       cursor.hash = head.hash;
       cursor.next = latest + 1n;
+      live = true;
       // New events mean the reserves changed: refresh them now instead of at the next poll.
       if (changed) void queryClient.invalidateQueries({ queryKey: ["reserves"] });
     };
@@ -231,8 +252,8 @@ export function MarketDataProvider({ children }: { readonly children: ReactNode 
   }, [publicClient, queryClient]);
 
   const value = useMemo<MarketData>(
-    () => ({ swaps, syncs, status, now }),
-    [swaps, syncs, status, now],
+    () => ({ swaps, syncs, status, now, subscribe }),
+    [swaps, syncs, status, now, subscribe],
   );
   return <MarketDataContext.Provider value={value}>{children}</MarketDataContext.Provider>;
 }
