@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import type { Address } from "viem";
 import { formatCount, formatDeltaPct, formatUsd } from "@/lib/display";
 import { cx } from "@/lib/format";
 import { MARKET } from "@/lib/market";
@@ -26,6 +26,15 @@ const METRICS: readonly { readonly id: Metric; readonly label: string }[] = [
 const WINDOWS: readonly WindowKey[] = ["5m", "1h", "24h"];
 const VISIBLE_ROWS = 10;
 
+type RankedPanelProps = {
+  readonly metric: Metric;
+  readonly onMetricChange: (metric: Metric) => void;
+  readonly windowKey: WindowKey;
+  readonly onWindowChange: (windowKey: WindowKey) => void;
+  readonly selected: Address | undefined;
+  readonly onSelect: (token: Address | undefined) => void;
+};
+
 function formatValue(metric: Metric, stat: TokenStat): string {
   const value = metricValue(stat, metric);
   return metric === "swaps" ? formatCount(value) : formatUsd(value);
@@ -47,10 +56,15 @@ function deltaClass(delta: number | null): string {
   return delta > 0 ? "text-up" : "text-down";
 }
 
-/** Ranked list of tokens by volume, TVL, swaps or fees over a chosen time window. */
-export function RankedPanel() {
-  const [metric, setMetric] = useState<Metric>("volume");
-  const [windowKey, setWindowKey] = useState<WindowKey>("1h");
+/** Ranked list of tokens by volume, TVL, swaps or fees over a time window. Rows select a token. */
+export function RankedPanel({
+  metric,
+  onMetricChange,
+  windowKey,
+  onWindowChange,
+  selected,
+  onSelect,
+}: RankedPanelProps) {
   const stats = useTokenStats(windowKey);
   const rows = stats === undefined ? undefined : rankTokens(stats, metric).slice(0, VISIBLE_ROWS);
 
@@ -80,7 +94,7 @@ export function RankedPanel() {
             value={metric}
             onChange={(event) => {
               const next = METRICS.find((item) => item.id === event.target.value);
-              if (next !== undefined) setMetric(next.id);
+              if (next !== undefined) onMetricChange(next.id);
             }}
             className="w-full appearance-none rounded border border-line bg-bg py-1.5 pl-3 pr-8 font-mono text-label uppercase text-text focus:border-accent focus:outline-none"
           >
@@ -106,7 +120,7 @@ export function RankedPanel() {
               key={item}
               type="button"
               aria-pressed={windowKey === item}
-              onClick={() => setWindowKey(item)}
+              onClick={() => onWindowChange(item)}
               className={cx(
                 "border px-2 py-1 font-mono text-label uppercase",
                 windowKey === item
@@ -126,18 +140,26 @@ export function RankedPanel() {
         <ol>
           {rows.map((stat, index) => {
             const delta = metricDeltaPct(stat, metric);
+            const isSelected = selected === stat.token.address;
             return (
-              <li
-                key={stat.token.address}
-                className="grid grid-cols-[1.25rem_1.5rem_1fr_auto_4.5rem] items-center gap-3 border-b border-line px-4 py-2 font-mono text-data"
-              >
-                <span className="text-muted">{index + 1}</span>
-                <TokenMark symbol={stat.token.symbol} />
-                <span className="font-sans text-sm font-semibold uppercase tracking-label text-text">
-                  {stat.token.symbol}
-                </span>
-                <span className="text-right text-text">{formatValue(metric, stat)}</span>
-                <span className={cx("text-right", deltaClass(delta))}>{formatDeltaPct(delta)}</span>
+              <li key={stat.token.address}>
+                <button
+                  type="button"
+                  aria-pressed={isSelected}
+                  onClick={() => onSelect(isSelected ? undefined : stat.token.address)}
+                  className={cx(
+                    "grid w-full grid-cols-[1.25rem_1.5rem_1fr_auto_4.5rem] items-center gap-3 border-b border-l-2 border-line px-4 py-2 text-left font-mono text-data hover:bg-bg",
+                    isSelected ? "border-l-accent bg-bg" : "border-l-transparent",
+                  )}
+                >
+                  <span className="text-muted">{index + 1}</span>
+                  <TokenMark symbol={stat.token.symbol} />
+                  <span className="font-sans text-sm font-semibold uppercase tracking-label text-text">
+                    {stat.token.symbol}
+                  </span>
+                  <span className="text-right text-text">{formatValue(metric, stat)}</span>
+                  <span className={cx("text-right", deltaClass(delta))}>{formatDeltaPct(delta)}</span>
+                </button>
               </li>
             );
           })}
