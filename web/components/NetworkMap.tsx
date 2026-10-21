@@ -32,10 +32,13 @@ import { recentSwapsForToken, type SwapEvent } from "@/lib/events";
 import { isLargeTrade, layoutNodes, nodeRadius, particleRadius, type Vec } from "@/lib/mapMath";
 import { createMapData, drawFrame } from "@/lib/mapRender";
 import { MARKET, TOKENS_BY_ADDRESS } from "@/lib/market";
+import { FrameMeter } from "@/lib/frameStats";
 import { SpritePool } from "@/lib/particles";
+import { createRng } from "@/lib/prng";
 import { swapValueUsd, unitsToNumber, type TokenStat, type WindowKey } from "@/lib/stats";
 import { usePoolStats, useTokenStats } from "@/lib/useMarketStats";
 import { useMarketData } from "./MarketDataProvider";
+import { PerfOverlay } from "./PerfOverlay";
 import { SelectionCard, type CardPool, type CardTrade } from "./SelectionCard";
 
 const PARTICLE_CAPACITY = 300;
@@ -49,6 +52,7 @@ const SPAWN_GAP_MS = 60;
 const DRAG_THRESHOLD_PX = 4;
 const INERTIA_IDLE_MS = 80;
 const TOOLTIP_WIDTH = 176;
+const STRESS_RINGS = 40;
 
 type DragState = {
   readonly pointerId: number;
@@ -140,6 +144,16 @@ export function NetworkMap({ windowKey, selected, onSelect }: NetworkMapProps) {
   const dragRef = useRef<DragState | null>(null);
   const pointerRef = useRef<Vec>({ x: 0, y: 0 });
   const nextSlotRef = useRef(0);
+  const stressRef = useRef(false);
+  const meter = useMemo(() => new FrameMeter(), []);
+  const stressRng = useMemo(() => createRng(7), []);
+  const [perfVisible, setPerfVisible] = useState(false);
+  const [stressOn, setStressOn] = useState(false);
+
+  // The profiling tools stay hidden unless the address ends in ?perf.
+  useEffect(() => {
+    setPerfVisible(new URLSearchParams(window.location.search).has("perf"));
+  }, []);
 
   const data = useMemo(createMapData, []);
   const particles = useMemo(() => new SpritePool(PARTICLE_CAPACITY), []);
@@ -228,11 +242,37 @@ export function NetworkMap({ windowKey, selected, onSelect }: NetworkMapProps) {
     const observer = new ResizeObserver(resize);
     observer.observe(container);
 
+    // Profiling only: keeps the pools full so the worst case can be measured.
+    const refillStress = (time: number): void => {
+      const layout = data.layout;
+      if (layout === undefined) return;
+      const pools = MARKET.pools;
+      while (particles.activeCount < PARTICLE_CAPACITY) {
+        const pool = pools[Math.floor(stressRng() * pools.length)];
+        if (pool === undefined) return;
+        const forward = stressRng() < 0.5;
+        const from = data.byAddress.get(forward ? pool.token0 : pool.token1);
+        const to = data.byAddress.get(forward ? pool.token1 : pool.token0);
+        if (from === undefined || to === undefined) return;
+        const duration = TRAVEL_MS * (0.7 + stressRng() * 0.6);
+        particles.spawn(from.x, from.y, to.x, to.y, 1.5 + stressRng() * 4, 0, time, duration);
+      }
+      while (rings.activeCount < STRESS_RINGS) {
+        const node = layout[Math.floor(stressRng() * layout.length)];
+        if (node === undefined) return;
+        const duration = RING_MS * (0.7 + stressRng() * 0.6);
+        rings.spawn(node.x, node.y, node.x, node.y, RING_EXTRA, 6, time, duration);
+      }
+    };
+
     let frame = 0;
     let last = performance.now();
     const tick = (time: number) => {
-      const dt = Math.min(64, Math.max(0, time - last));
+      const rawDt = time - last;
+      const dt = Math.min(64, Math.max(0, rawDt));
       last = time;
+      if (rawDt > 0 && rawDt < 1000) meter.record(rawDt);
+      if (stressRef.current) refillStress(time);
       if (dragRef.current === null && isMoving(velocityRef.current)) {
         cameraRef.current = panBy(
           cameraRef.current,
@@ -265,7 +305,7 @@ export function NetworkMap({ windowKey, selected, onSelect }: NetworkMapProps) {
       cancelAnimationFrame(frame);
       observer.disconnect();
     };
-  }, [data, particles, rings, symbols]);
+  }, [data, particles, rings, symbols, meter, stressRng]);
 
   // Escape clears the selection.
   useEffect(() => {
@@ -469,6 +509,20 @@ export function NetworkMap({ windowKey, selected, onSelect }: NetworkMapProps) {
           R
         </MapButton>
       </div>
+
+      {perfVisible && (
+        <PerfOverlay
+          meter={meter}
+          particles={particles}
+          rings={rings}
+          stress={stressOn}
+          onToggleStress={() => {
+            const next = !stressRef.current;
+            stressRef.current = next;
+            setStressOn(next);
+          }}
+        />
+      )}
 
       {hoveredStat !== undefined && (
         <div
