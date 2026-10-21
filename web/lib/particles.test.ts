@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { SpritePool, spriteProgress, type Sprite } from "./particles";
+import { SpritePool, fadeLevel, spriteProgress, type Sprite } from "./particles";
 
 function first(pool: SpritePool): Sprite {
   const sprite = pool.items[0];
@@ -70,4 +70,13 @@ test("spriteProgress runs from 0 to 1 over the duration and clamps outside it", 
   const instant = pool.items[1];
   assert.ok(instant !== undefined);
   assert.equal(spriteProgress(instant, 100), 1);
+});
+
+test("fadeLevel stays at full brightness, then fades to zero at the end of the journey", () => {
+  assert.equal(fadeLevel(0, 20), 20);
+  assert.equal(fadeLevel(0.5, 20), 20);
+  assert.equal(fadeLevel(0.88, 20), 20);
+  assert.equal(fadeLevel(0.94, 20), 10);
+  assert.equal(fadeLevel(1, 20), 0);
+  assert.equal(fadeLevel(1.5, 20), 0);
 });

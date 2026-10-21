@@ -100,3 +100,18 @@ export function spriteProgress(sprite: Sprite, now: number): number {
   const progress = (now - sprite.startAt) / sprite.duration;
   return progress < 0 ? 0 : progress > 1 ? 1 : progress;
 }
+
+/** Number of brightness steps used when particles fade out. */
+export const FADE_STEPS = 20;
+/** A particle is at full brightness until this fraction of its journey, then fades out. */
+export const FADE_START = 0.88;
+
+/**
+ * Brightness step from 0 to steps for a particle at the given progress: full until
+ * FADE_START of the way, then fading to zero. Whole steps let colour strings be built once.
+ */
+export function fadeLevel(progress: number, steps: number): number {
+  if (progress <= FADE_START) return steps;
+  const fade = (1 - progress) / (1 - FADE_START);
+  return Math.max(0, Math.round(fade * steps));
+}
