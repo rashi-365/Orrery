@@ -10,13 +10,20 @@ import {
   rgba,
   type NodeLayout,
 } from "./mapMath";
-import { spriteProgress, type SpritePool } from "./particles";
+import { FADE_STEPS, fadeLevel, spriteProgress, type SpritePool } from "./particles";
 import type { PoolMeta, PoolStat, TokenStat } from "./stats";
 
 const TAU = Math.PI * 2;
 const LABEL_SIZE = 6.5;
 const TICK_COUNT = 72;
 const TICK_RING = 186;
+
+// Colour strings for every fade step, built once, so drawing a particle creates no strings.
+const alphaStyles = (peak: number): readonly string[] =>
+  Array.from({ length: FADE_STEPS + 1 }, (_, i) => `rgba(255, 255, 255, ${(peak * i) / FADE_STEPS})`);
+const TAIL_STYLES = alphaStyles(0.35);
+const HEAD_STYLES = alphaStyles(0.95);
+const RING_STYLES = alphaStyles(0.9);
 
 /** Everything the canvas draws from. Updated in place by the map component. */
 export type MapData = {
@@ -134,22 +141,23 @@ function drawParticles(ctx: CanvasRenderingContext2D, particles: SpritePool, tim
     const sprite = particles.items[i];
     if (sprite === undefined || !sprite.active || time < sprite.startAt) continue;
     const progress = spriteProgress(sprite, time);
+    const level = fadeLevel(progress, FADE_STEPS);
+    if (level === 0) continue;
     const eased = smoothstep(progress);
     const x = sprite.x0 + (sprite.x1 - sprite.x0) * eased;
     const y = sprite.y0 + (sprite.y1 - sprite.y0) * eased;
     const tail = Math.max(0, eased - 0.12);
     const tailX = sprite.x0 + (sprite.x1 - sprite.x0) * tail;
     const tailY = sprite.y0 + (sprite.y1 - sprite.y0) * tail;
-    const fade = progress > 0.88 ? (1 - progress) / 0.12 : 1;
 
-    ctx.strokeStyle = `rgba(255, 255, 255, ${0.35 * fade})`;
+    ctx.strokeStyle = TAIL_STYLES[level] ?? "transparent";
     ctx.lineWidth = sprite.size * 0.8;
     ctx.beginPath();
     ctx.moveTo(tailX, tailY);
     ctx.lineTo(x, y);
     ctx.stroke();
 
-    ctx.fillStyle = `rgba(255, 255, 255, ${0.95 * fade})`;
+    ctx.fillStyle = HEAD_STYLES[level] ?? "transparent";
     ctx.beginPath();
     ctx.arc(x, y, sprite.size, 0, TAU);
     ctx.fill();
@@ -167,8 +175,10 @@ function drawRings(
     const sprite = rings.items[i];
     if (sprite === undefined || !sprite.active || time < sprite.startAt) continue;
     const progress = spriteProgress(sprite, time);
+    const level = Math.round((1 - progress) * FADE_STEPS);
+    if (level <= 0) continue;
     const eased = 1 - (1 - progress) * (1 - progress);
-    ctx.strokeStyle = `rgba(255, 255, 255, ${0.9 * (1 - progress)})`;
+    ctx.strokeStyle = RING_STYLES[level] ?? "transparent";
     ctx.beginPath();
     ctx.arc(sprite.x0, sprite.y0, sprite.base + sprite.size * eased, 0, TAU);
     ctx.stroke();
