@@ -100,3 +100,28 @@ export function particleRadius(valueUsd: number | null): number {
 export function isLargeTrade(priceImpactBps: number | null): boolean {
   return priceImpactBps !== null && priceImpactBps >= LARGE_IMPACT_BPS;
 }
+
+export const INTRO_STAGGER_MS = 60;
+export const INTRO_NODE_MS = 700;
+export const INTRO_EDGE_MS = 600;
+
+function clamp01(value: number): number {
+  return value < 0 ? 0 : value > 1 ? 1 : value;
+}
+
+/** Progress of one node's spawn animation, eased so it starts fast. Nodes start one after another. */
+export function introNodeProgress(elapsedMs: number, index: number): number {
+  const raw = clamp01((elapsedMs - index * INTRO_STAGGER_MS) / INTRO_NODE_MS);
+  return 1 - (1 - raw) ** 3;
+}
+
+/** Progress of the pool lines fading in, which begins once the last node has landed. */
+export function introEdgeProgress(elapsedMs: number, nodeCount: number): number {
+  const start = Math.max(0, nodeCount - 1) * INTRO_STAGGER_MS + INTRO_NODE_MS;
+  return clamp01((elapsedMs - start) / INTRO_EDGE_MS);
+}
+
+/** A coordinate moved toward the map centre: progress 0 is the centre, 1 is the real position. */
+export function lerpFromCenter(value: number, progress: number): number {
+  return WORLD_CENTER + (value - WORLD_CENTER) * progress;
+}

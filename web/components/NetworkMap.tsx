@@ -30,7 +30,7 @@ import {
 import { formatClock, formatUsd } from "@/lib/display";
 import { recentSwapsForToken, type SwapEvent } from "@/lib/events";
 import { isLargeTrade, layoutNodes, nodeRadius, particleRadius, type Vec } from "@/lib/mapMath";
-import { createMapData, drawFrame } from "@/lib/mapRender";
+import { createMapData, drawFrame, type DisplayNode } from "@/lib/mapRender";
 import { MARKET, TOKENS_BY_ADDRESS } from "@/lib/market";
 import { FrameMeter } from "@/lib/frameStats";
 import { SpritePool } from "@/lib/particles";
@@ -168,6 +168,17 @@ export function NetworkMap({ windowKey, selected, onSelect }: NetworkMapProps) {
   );
   const [hovered, setHovered] = useState<Address | undefined>(undefined);
 
+  // Follow the reduced-motion setting: with it on, the intro is skipped.
+  useEffect(() => {
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    data.reduceMotion = query.matches;
+    const onChange = () => {
+      data.reduceMotion = query.matches;
+    };
+    query.addEventListener("change", onChange);
+    return () => query.removeEventListener("change", onChange);
+  }, [data]);
+
   // Keep the drawing data in step with the latest statistics and selection.
   useEffect(() => {
     data.selected = selected;
@@ -182,6 +193,10 @@ export function NetworkMap({ windowKey, selected, onSelect }: NetworkMapProps) {
       const layout = layoutNodes(order);
       data.layout = layout;
       data.byAddress = new Map(layout.map((node) => [node.address, node] as const));
+      data.display = new Map(
+        layout.map((node): [Address, DisplayNode] => [node.address, { x: node.x, y: node.y, p: 1 }]),
+      );
+      data.introStart = data.reduceMotion ? undefined : performance.now();
     }
     if (poolStats !== undefined) {
       data.poolStats = new Map(poolStats.map((stat) => [stat.pool.address, stat] as const));

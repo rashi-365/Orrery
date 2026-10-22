@@ -5,6 +5,9 @@ import {
   OUTER_RADIUS,
   WORLD_CENTER,
   edgeAlpha,
+  introEdgeProgress,
+  introNodeProgress,
+  lerpFromCenter,
   nodeRadius,
   pressureColor,
   rgba,
@@ -25,28 +28,38 @@ const TAIL_STYLES = alphaStyles(0.35);
 const HEAD_STYLES = alphaStyles(0.95);
 const RING_STYLES = alphaStyles(0.9);
 
+/** Where a node is drawn right now. During the intro it is scaled out from the map centre. */
+export type DisplayNode = { x: number; y: number; p: number };
+
 /** Everything the canvas draws from. Updated in place by the map component. */
 export type MapData = {
   layout: readonly NodeLayout[] | undefined;
   byAddress: Map<Address, NodeLayout>;
+  display: Map<Address, DisplayNode>;
   stats: Map<Address, TokenStat>;
   poolStats: Map<Address, PoolStat>;
   maxTvl: number;
   maxVolume: number;
   hovered: Address | undefined;
   selected: Address | undefined;
+  /** Time (ms) the intro started, or undefined when there is none to play. */
+  introStart: number | undefined;
+  reduceMotion: boolean;
 };
 
 export function createMapData(): MapData {
   return {
     layout: undefined,
     byAddress: new Map(),
+    display: new Map(),
     stats: new Map(),
     poolStats: new Map(),
     maxTvl: 0,
     maxVolume: 0,
     hovered: undefined,
     selected: undefined,
+    introStart: undefined,
+    reduceMotion: false,
   };
 }
 
@@ -75,6 +88,20 @@ function neighborsOf(pools: readonly PoolMeta[], focus: Address): Set<Address> {
     else if (pool.token1 === focus) set.add(pool.token0);
   }
   return set;
+}
+
+/** Moves every node along its spawn path for the current moment of the intro. Does not allocate. */
+function updateDisplay(data: MapData, layout: readonly NodeLayout[], elapsed: number): void {
+  for (let i = 0; i < layout.length; i++) {
+    const node = layout[i];
+    if (node === undefined) continue;
+    const shown = data.display.get(node.address);
+    if (shown === undefined) continue;
+    const progress = introNodeProgress(elapsed, i);
+    shown.x = lerpFromCenter(node.x, progress);
+    shown.y = lerpFromCenter(node.y, progress);
+    shown.p = progress;
+  }
 }
 
 function drawOrbits(ctx: CanvasRenderingContext2D, hairline: number): void {
@@ -116,18 +143,20 @@ function drawEdges(
   pools: readonly PoolMeta[],
   focus: Address | undefined,
   hairline: number,
+  fade: number,
 ): void {
+  if (fade <= 0) return;
   ctx.lineWidth = hairline;
   for (const pool of pools) {
-    const a = data.byAddress.get(pool.token0);
-    const b = data.byAddress.get(pool.token1);
+    const a = data.display.get(pool.token0);
+    const b = data.display.get(pool.token1);
     if (a === undefined || b === undefined) continue;
     let alpha = edgeAlpha(data.poolStats.get(pool.address)?.volumeUsd ?? 0, data.maxVolume);
     if (focus !== undefined) {
       const connected = pool.token0 === focus || pool.token1 === focus;
       alpha = connected ? Math.max(alpha, 0.6) : alpha * 0.12;
     }
-    ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
+    ctx.strokeStyle = `rgba(255, 255, 255, ${alpha * fade})`;
     ctx.beginPath();
     ctx.moveTo(a.x, a.y);
     ctx.lineTo(b.x, b.y);
@@ -198,27 +227,30 @@ function drawNodes(
   ctx.font = `${LABEL_SIZE}px ${fontFamily}`;
   ctx.textBaseline = "middle";
   for (const node of layout) {
+    const shown = data.display.get(node.address);
+    if (shown === undefined || shown.p <= 0) continue;
     const stat = data.stats.get(node.address);
-    const radius = nodeRadius(stat?.tvlUsd ?? 0, data.maxTvl);
+    const radius = nodeRadius(stat?.tvlUsd ?? 0, data.maxTvl) * (0.4 + 0.6 * shown.p);
     const color = pressureColor(stat?.pressure ?? 0);
     const dim = neighbors !== undefined && !neighbors.has(node.address);
+    const visible = shown.p;
 
-    ctx.fillStyle = rgba(color, dim ? 0.25 : 1);
+    ctx.fillStyle = rgba(color, (dim ? 0.25 : 1) * visible);
     ctx.beginPath();
-    ctx.arc(node.x, node.y, radius, 0, TAU);
+    ctx.arc(shown.x, shown.y, radius, 0, TAU);
     ctx.fill();
 
     ctx.lineWidth = hairline;
-    ctx.strokeStyle = rgba(color, dim ? 0.12 : 0.45);
+    ctx.strokeStyle = rgba(color, (dim ? 0.12 : 0.45) * visible);
     ctx.beginPath();
-    ctx.arc(node.x, node.y, radius + 3, 0, TAU);
+    ctx.arc(shown.x, shown.y, radius + 3, 0, TAU);
     ctx.stroke();
 
     if (node.address === focus) {
       ctx.lineWidth = hairline * 1.5;
       ctx.strokeStyle = "rgba(255, 255, 255, 0.95)";
       ctx.beginPath();
-      ctx.arc(node.x, node.y, radius + 6, 0, TAU);
+      ctx.arc(shown.x, shown.y, radius + 6, 0, TAU);
       ctx.stroke();
     }
 
@@ -226,11 +258,11 @@ function drawNodes(
     if (symbol !== undefined) {
       const cos = Math.cos(node.angle);
       ctx.textAlign = cos > 0.25 ? "left" : cos < -0.25 ? "right" : "center";
-      ctx.fillStyle = `rgba(228, 228, 228, ${dim ? 0.3 : 0.9})`;
+      ctx.fillStyle = `rgba(228, 228, 228, ${(dim ? 0.3 : 0.9) * visible})`;
       ctx.fillText(
         symbol,
-        node.x + cos * (radius + 8),
-        node.y + Math.sin(node.angle) * (radius + 8),
+        shown.x + cos * (radius + 8),
+        shown.y + Math.sin(node.angle) * (radius + 8),
       );
     }
   }
@@ -257,9 +289,16 @@ export function drawFrame(args: FrameArgs): void {
   const layout = data.layout;
   if (layout === undefined) return;
 
+  // Infinity means the intro is finished (or switched off): every progress value clamps to 1.
+  const elapsed =
+    data.introStart === undefined || data.reduceMotion
+      ? Number.POSITIVE_INFINITY
+      : time - data.introStart;
+  updateDisplay(data, layout, elapsed);
+
   const focus = data.hovered ?? data.selected;
   const neighbors = focus === undefined ? undefined : neighborsOf(pools, focus);
-  drawEdges(ctx, data, pools, focus, hairline);
+  drawEdges(ctx, data, pools, focus, hairline, introEdgeProgress(elapsed, layout.length));
   drawParticles(ctx, particles, time);
   drawRings(ctx, rings, time, hairline);
   drawNodes(ctx, data, layout, symbols, focus, neighbors, hairline, fontFamily);

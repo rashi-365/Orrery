@@ -9,8 +9,11 @@ import {
   OUTER_RADIUS,
   WORLD_CENTER,
   edgeAlpha,
+  introEdgeProgress,
+  introNodeProgress,
   isLargeTrade,
   layoutNodes,
+  lerpFromCenter,
   nodeRadius,
   particleRadius,
   pressureColor,
@@ -111,4 +114,29 @@ test("particle radius grows with trade value and is capped, and large trades are
   assert.equal(isLargeTrade(199), false);
   assert.equal(isLargeTrade(200), true);
   assert.equal(isLargeTrade(900), true);
+});
+
+test("each node's spawn progress starts at its own staggered moment and eases out", () => {
+  assert.equal(introNodeProgress(0, 0), 0);
+  assert.equal(introNodeProgress(700, 0), 1);
+  assert.equal(introNodeProgress(350, 0), 0.875);
+  assert.equal(introNodeProgress(120, 2), 0);
+  assert.equal(introNodeProgress(470, 2), 0.875);
+  assert.equal(introNodeProgress(-50, 0), 0);
+  assert.equal(introNodeProgress(Number.POSITIVE_INFINITY, 5), 1);
+});
+
+test("the pool lines fade in only after the last of sixteen nodes has landed", () => {
+  assert.equal(introEdgeProgress(0, 16), 0);
+  assert.equal(introEdgeProgress(1600, 16), 0);
+  approx(introEdgeProgress(1900, 16), 0.5);
+  assert.equal(introEdgeProgress(2200, 16), 1);
+  assert.equal(introEdgeProgress(Number.POSITIVE_INFINITY, 16), 1);
+});
+
+test("lerpFromCenter moves a coordinate between the map centre and its real position", () => {
+  assert.equal(lerpFromCenter(300, 0), 200);
+  assert.equal(lerpFromCenter(300, 1), 300);
+  assert.equal(lerpFromCenter(300, 0.5), 250);
+  assert.equal(lerpFromCenter(100, 0.5), 150);
 });
