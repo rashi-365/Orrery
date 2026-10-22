@@ -1,9 +1,10 @@
+import type { ReactNode } from "react";
 import { cx } from "@/lib/format";
 
 type StatProps = {
   readonly label: string;
   /** Null renders as a dash, for values that are not available yet. */
-  readonly value: string | null;
+  readonly value: ReactNode;
   readonly unit?: string;
   readonly align?: "left" | "right";
 };
