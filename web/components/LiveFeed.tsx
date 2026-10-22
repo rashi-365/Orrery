@@ -1,5 +1,6 @@
 "use client";
 
+import { AnimatePresence, motion } from "framer-motion";
 import { formatAmount, formatBps } from "@/lib/amount";
 import { formatClock, shortHash } from "@/lib/display";
 import { recentSwaps } from "@/lib/events";
@@ -23,7 +24,7 @@ export function FeedStatus() {
   );
 }
 
-/** The most recent swaps: time, short tx hash, route, amounts and price impact. */
+/** The most recent swaps: time, short tx hash, route, amounts and price impact. New rows slide in. */
 export function LiveFeed() {
   const { swaps } = useMarketData();
   const recent = recentSwaps(swaps, FEED_ROWS);
@@ -36,28 +37,37 @@ export function LiveFeed() {
     );
   }
 
+  const rows = recent.flatMap((swap) => {
+    const tokenIn = TOKENS_BY_ADDRESS.get(swap.tokenIn);
+    const tokenOut = TOKENS_BY_ADDRESS.get(swap.tokenOut);
+    if (tokenIn === undefined || tokenOut === undefined) return [];
+    return [
+      <motion.li
+        key={swap.id}
+        layout="position"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.18, ease: "easeOut" }}
+        className="flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-2"
+      >
+        <span className="text-muted">{formatClock(swap.timestamp)}</span>
+        <span className="text-muted" title={swap.txHash}>
+          {shortHash(swap.txHash)}
+        </span>
+        <span className="text-text">{`${tokenIn.symbol} > ${tokenOut.symbol}`}</span>
+        <span className="text-text">
+          {`${formatAmount(swap.amountIn, tokenIn.decimals, 4)} > ${formatAmount(swap.amountOut, tokenOut.decimals, 4)}`}
+        </span>
+        <span className="ml-auto text-muted">
+          {swap.priceImpactBps === null ? "--" : `${formatBps(swap.priceImpactBps)}%`}
+        </span>
+      </motion.li>,
+    ];
+  });
+
   return (
     <ul className="divide-y divide-line font-mono text-data">
-      {recent.map((swap) => {
-        const tokenIn = TOKENS_BY_ADDRESS.get(swap.tokenIn);
-        const tokenOut = TOKENS_BY_ADDRESS.get(swap.tokenOut);
-        if (tokenIn === undefined || tokenOut === undefined) return null;
-        return (
-          <li key={swap.id} className="flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-2">
-            <span className="text-muted">{formatClock(swap.timestamp)}</span>
-            <span className="text-muted" title={swap.txHash}>
-              {shortHash(swap.txHash)}
-            </span>
-            <span className="text-text">{`${tokenIn.symbol} > ${tokenOut.symbol}`}</span>
-            <span className="text-text">
-              {`${formatAmount(swap.amountIn, tokenIn.decimals, 4)} > ${formatAmount(swap.amountOut, tokenOut.decimals, 4)}`}
-            </span>
-            <span className="ml-auto text-muted">
-              {swap.priceImpactBps === null ? "--" : `${formatBps(swap.priceImpactBps)}%`}
-            </span>
-          </li>
-        );
-      })}
+      <AnimatePresence initial={false}>{rows}</AnimatePresence>
     </ul>
   );
 }

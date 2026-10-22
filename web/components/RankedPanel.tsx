@@ -1,19 +1,14 @@
 "use client";
 
+import { motion } from "framer-motion";
 import Link from "next/link";
 import type { Address } from "viem";
 import { formatCount, formatDeltaPct, formatUsd } from "@/lib/display";
 import { cx } from "@/lib/format";
 import { MARKET } from "@/lib/market";
-import {
-  metricDeltaPct,
-  metricValue,
-  rankTokens,
-  type Metric,
-  type TokenStat,
-  type WindowKey,
-} from "@/lib/stats";
+import { metricDeltaPct, metricValue, rankTokens, type Metric, type WindowKey } from "@/lib/stats";
 import { useTokenStats } from "@/lib/useMarketStats";
+import { AnimatedNumber } from "./AnimatedNumber";
 import { Panel } from "./Panel";
 
 const METRICS: readonly { readonly id: Metric; readonly label: string }[] = [
@@ -34,11 +29,6 @@ type RankedPanelProps = {
   readonly selected: Address | undefined;
   readonly onSelect: (token: Address | undefined) => void;
 };
-
-function formatValue(metric: Metric, stat: TokenStat): string {
-  const value = metricValue(stat, metric);
-  return metric === "swaps" ? formatCount(value) : formatUsd(value);
-}
 
 function TokenMark({ symbol }: { readonly symbol: string }) {
   return (
@@ -142,7 +132,11 @@ export function RankedPanel({
             const delta = metricDeltaPct(stat, metric);
             const isSelected = selected === stat.token.address;
             return (
-              <li key={stat.token.address}>
+              <motion.li
+                key={stat.token.address}
+                layout="position"
+                transition={{ duration: 0.2, ease: "easeOut" }}
+              >
                 <button
                   type="button"
                   aria-pressed={isSelected}
@@ -157,10 +151,17 @@ export function RankedPanel({
                   <span className="font-sans text-sm font-semibold uppercase tracking-label text-text">
                     {stat.token.symbol}
                   </span>
-                  <span className="text-right text-text">{formatValue(metric, stat)}</span>
+                  <span className="text-right text-text">
+                    <AnimatedNumber
+                      key={`${metric}-${windowKey}`}
+                      value={metricValue(stat, metric)}
+                      format={metric === "swaps" ? formatCount : formatUsd}
+                      minChars={8}
+                    />
+                  </span>
                   <span className={cx("text-right", deltaClass(delta))}>{formatDeltaPct(delta)}</span>
                 </button>
-              </li>
+              </motion.li>
             );
           })}
         </ol>
