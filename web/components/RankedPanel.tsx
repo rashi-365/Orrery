@@ -7,6 +7,8 @@ import { formatCount, formatDeltaPct, formatUsd } from "@/lib/display";
 import { cx } from "@/lib/format";
 import { MARKET } from "@/lib/market";
 import { metricDeltaPct, metricValue, rankTokens, type Metric, type WindowKey } from "@/lib/stats";
+import { describeError } from "@/lib/errors";
+import { usePoolReserves } from "@/lib/hooks";
 import { useTokenStats } from "@/lib/useMarketStats";
 import { AnimatedNumber } from "./AnimatedNumber";
 import { Panel } from "./Panel";
@@ -56,6 +58,7 @@ export function RankedPanel({
   onSelect,
 }: RankedPanelProps) {
   const stats = useTokenStats(windowKey);
+  const reserves = usePoolReserves();
   const rows = stats === undefined ? undefined : rankTokens(stats, metric).slice(0, VISIBLE_ROWS);
 
   const caption =
@@ -125,7 +128,15 @@ export function RankedPanel({
       </div>
 
       {rows === undefined ? (
-        <p className="px-4 py-6 font-mono text-label uppercase text-muted">Loading</p>
+        <p className="px-4 py-6 font-mono text-label uppercase text-muted">
+          {reserves.isError
+            ? `Cannot read pools: ${describeError(reserves.error)}`
+            : reserves.data !== undefined
+              ? "Pools loaded, waiting for the clock"
+              : reserves.fetchStatus === "idle"
+                ? "Waiting for the chain client"
+                : "Loading pools"}
+        </p>
       ) : (
         <ol>
           {rows.map((stat, index) => {
