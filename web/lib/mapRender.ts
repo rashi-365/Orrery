@@ -18,8 +18,6 @@ import type { PoolMeta, PoolStat, TokenStat } from "./stats";
 
 const TAU = Math.PI * 2;
 const LABEL_SIZE = 6.5;
-const TICK_COUNT = 72;
-const TICK_RING = 186;
 
 // Colour strings for every fade step, built once, so drawing a particle creates no strings.
 const alphaStyles = (peak: number): readonly string[] =>
@@ -106,35 +104,14 @@ function updateDisplay(data: MapData, layout: readonly NodeLayout[], elapsed: nu
 
 function drawOrbits(ctx: CanvasRenderingContext2D, hairline: number): void {
   ctx.lineWidth = hairline;
-  ctx.strokeStyle = "rgba(255, 255, 255, 0.09)";
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.14)";
+  ctx.setLineDash([1.2, 6]);
   for (const radius of [INNER_RADIUS, OUTER_RADIUS]) {
     ctx.beginPath();
     ctx.arc(WORLD_CENTER, WORLD_CENTER, radius, 0, TAU);
     ctx.stroke();
   }
-
-  ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
-  ctx.beginPath();
-  ctx.arc(WORLD_CENTER, WORLD_CENTER, TICK_RING, 0, TAU);
-  ctx.stroke();
-
-  ctx.strokeStyle = "rgba(255, 255, 255, 0.22)";
-  ctx.beginPath();
-  for (let i = 0; i < TICK_COUNT; i++) {
-    const angle = (TAU * i) / TICK_COUNT;
-    const outer = TICK_RING + (i % 6 === 0 ? 11 : 5);
-    ctx.moveTo(WORLD_CENTER + Math.cos(angle) * TICK_RING, WORLD_CENTER + Math.sin(angle) * TICK_RING);
-    ctx.lineTo(WORLD_CENTER + Math.cos(angle) * outer, WORLD_CENTER + Math.sin(angle) * outer);
-  }
-  ctx.stroke();
-
-  ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
-  ctx.beginPath();
-  ctx.moveTo(WORLD_CENTER - 8, WORLD_CENTER);
-  ctx.lineTo(WORLD_CENTER + 8, WORLD_CENTER);
-  ctx.moveTo(WORLD_CENTER, WORLD_CENTER - 8);
-  ctx.lineTo(WORLD_CENTER, WORLD_CENTER + 8);
-  ctx.stroke();
+  ctx.setLineDash([]);
 }
 
 function drawEdges(

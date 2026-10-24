@@ -34,7 +34,7 @@ const config: Config = {
     },
     extend: {
       fontFamily: {
-        sans: ["var(--font-archivo)", "Arial", "sans-serif"],
+        sans: ["var(--font-grotesk)", "Arial", "sans-serif"],
         mono: ["var(--font-jetbrains)", "ui-monospace", "Menlo", "monospace"],
       },
       fontSize: {

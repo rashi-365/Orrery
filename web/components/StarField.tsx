@@ -1,7 +1,7 @@
 import { createRng } from "@/lib/prng";
 
 const WHITE = "#FFFFFF";
-const AMBER = "#F2A33A";
+const AMBER = "#C8C8C8";
 const STAR_COUNT = 190;
 
 type Star = {

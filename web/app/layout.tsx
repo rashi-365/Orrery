@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Archivo, JetBrains_Mono } from "next/font/google";
+import { Sora, JetBrains_Mono } from "next/font/google";
 import { APP_NAME, APP_TAGLINE } from "@/config/app";
 import { StarField } from "@/components/StarField";
 import { Providers } from "@/components/Providers";
@@ -10,7 +10,7 @@ import "./globals.css";
 // Pages render per request so the CSP nonce created in middleware.ts can be applied to them.
 export const dynamic = "force-dynamic";
 
-const archivo = Archivo({ subsets: ["latin"], variable: "--font-archivo", display: "swap" });
+const grotesk = Sora({ subsets: ["latin"], variable: "--font-grotesk", display: "swap" });
 const jetbrains = JetBrains_Mono({
   subsets: ["latin"],
   variable: "--font-jetbrains",
@@ -31,7 +31,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${archivo.variable} ${jetbrains.variable}`}>
+    <html lang="en" className={`${grotesk.variable} ${jetbrains.variable}`}>
       <body className="min-h-screen">
         <Providers>
           <StarField />

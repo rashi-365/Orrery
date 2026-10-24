@@ -100,7 +100,7 @@ function MapButton({
       type="button"
       aria-label={label}
       onClick={onClick}
-      className="h-8 w-8 border border-line-strong bg-bg font-mono text-data text-text hover:border-accent hover:text-accent"
+      className="h-8 w-8 rounded-full border border-white/15 bg-black/40 font-mono text-data text-text backdrop-blur-md transition hover:border-white/60 hover:text-white hover:shadow-[0_0_14px_rgba(255,255,255,0.25)]"
     >
       {children}
     </button>
@@ -110,7 +110,7 @@ function MapButton({
 function LegendRow({ swatch, children }: { readonly swatch: string; readonly children: ReactNode }) {
   return (
     <div className="flex items-center gap-2">
-      <span aria-hidden="true" className={`h-2 w-2 ${swatch}`} />
+      <span aria-hidden="true" className={`h-2 w-2 rounded-full ${swatch}`} />
       {children}
     </div>
   );
@@ -490,9 +490,9 @@ export function NetworkMap({ windowKey, selected, onSelect }: NetworkMapProps) {
         onPointerLeave={onPointerLeave}
       />
 
-      <div className="pointer-events-none absolute right-3 top-3 z-10 space-y-1 border border-line bg-bg px-3 py-2 font-mono text-label uppercase text-muted">
+      <div className="pointer-events-none absolute right-3 top-3 z-10 space-y-1 rounded-xl border border-white/10 bg-black/35 px-3 py-2 font-mono text-label uppercase text-muted backdrop-blur-md">
         <LegendRow swatch="bg-accent">Net buy</LegendRow>
-        <LegendRow swatch="bg-amber">Net sell</LegendRow>
+        <LegendRow swatch="bg-[#585858]">Net sell</LegendRow>
         <LegendRow swatch="bg-muted">Quiet</LegendRow>
         <p>Size: TVL</p>
         <p>Line: volume</p>
@@ -542,7 +542,7 @@ export function NetworkMap({ windowKey, selected, onSelect }: NetworkMapProps) {
       {hoveredStat !== undefined && (
         <div
           ref={tooltipRef}
-          className="pointer-events-none absolute left-0 top-0 z-20 w-44 border border-line-strong bg-bg px-3 py-2 font-mono text-data"
+          className="pointer-events-none absolute left-0 top-0 z-20 w-44 rounded-xl border border-white/15 bg-black/55 px-3 py-2 font-mono text-data backdrop-blur-md"
         >
           <p className="font-sans text-sm font-semibold uppercase tracking-label text-text">
             {hoveredStat.token.symbol}

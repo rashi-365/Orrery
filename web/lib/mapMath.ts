@@ -27,7 +27,7 @@ export type Rgb = readonly [number, number, number];
 
 export const COLOR_NEUTRAL: Rgb = [110, 110, 110];
 export const COLOR_BUY: Rgb = [245, 245, 245];
-export const COLOR_SELL: Rgb = [242, 163, 58];
+export const COLOR_SELL: Rgb = [88, 88, 88];
 
 function round2(value: number): number {
   return Math.round(value * 100) / 100;
@@ -73,7 +73,7 @@ function mix(from: Rgb, to: Rgb, amount: number): Rgb {
   ];
 }
 
-/** Grey when quiet, shading to white for net buying and to amber for net selling. */
+/** Grey when quiet, shading to white for net buying and to dark grey for net selling. */
 export function pressureColor(pressure: number): Rgb {
   if (!Number.isFinite(pressure) || pressure === 0) return COLOR_NEUTRAL;
   const amount = Math.sqrt(Math.min(1, Math.abs(pressure)));
