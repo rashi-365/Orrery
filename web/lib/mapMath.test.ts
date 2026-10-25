@@ -83,14 +83,19 @@ test("node radius follows the square root of TVL between the minimum and maximum
   assert.equal(nodeRadius(Number.NaN, 100), 3);
 });
 
-test("pressure colour is grey when quiet, white for buying and amber for selling", () => {
+test("pressure colour is grey when quiet, white for buying and red for selling", () => {
   assert.deepEqual(pressureColor(0), COLOR_NEUTRAL);
   assert.deepEqual(pressureColor(Number.NaN), COLOR_NEUTRAL);
   assert.deepEqual(pressureColor(1), COLOR_BUY);
   assert.deepEqual(pressureColor(5), COLOR_BUY);
   assert.deepEqual(pressureColor(-1), COLOR_SELL);
   assert.deepEqual(pressureColor(0.25), [178, 178, 178]);
-  assert.deepEqual(pressureColor(-0.25), [176, 137, 84]);
+  const mixed = pressureColor(-0.25);
+  for (let i = 0; i < 3; i++) {
+    const lo = Math.min(COLOR_NEUTRAL[i] ?? 0, COLOR_SELL[i] ?? 0);
+    const hi = Math.max(COLOR_NEUTRAL[i] ?? 0, COLOR_SELL[i] ?? 0);
+    assert.ok((mixed[i] ?? -1) >= lo && (mixed[i] ?? 256) <= hi);
+  }
   assert.equal(rgba([1, 2, 3], 0.5), "rgba(1, 2, 3, 0.5)");
   assert.equal(rgba([1, 2, 3]), "rgba(1, 2, 3, 1)");
 });

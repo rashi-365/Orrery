@@ -492,7 +492,7 @@ export function NetworkMap({ windowKey, selected, onSelect }: NetworkMapProps) {
 
       <div className="pointer-events-none absolute right-3 top-3 z-10 space-y-1 rounded-xl border border-white/10 bg-black/35 px-3 py-2 font-mono text-label uppercase text-muted backdrop-blur-md">
         <LegendRow swatch="bg-accent">Net buy</LegendRow>
-        <LegendRow swatch="bg-[#585858]">Net sell</LegendRow>
+        <LegendRow swatch="bg-[#D65454]">Net sell</LegendRow>
         <LegendRow swatch="bg-muted">Quiet</LegendRow>
         <p>Size: TVL</p>
         <p>Line: volume</p>
