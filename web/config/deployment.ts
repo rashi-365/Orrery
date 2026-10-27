@@ -1,5 +1,6 @@
 import { getAddress, isAddress, type Address } from "viem";
 import local from "./deployments/31337.json";
+import sepolia from "./deployments/11155111.json";
 
 export type TokenConfig = {
   readonly symbol: string;
@@ -108,6 +109,7 @@ export function parseDeployment(raw: unknown): DeploymentConfig {
 
 const DEPLOYMENTS: Readonly<Record<number, DeploymentConfig>> = {
   31337: parseDeployment(local),
+  11155111: parseDeployment(sepolia),
 };
 
 /** Returns the deployment for a chain, or undefined if the app has none for it. */
