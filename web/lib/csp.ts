@@ -7,7 +7,7 @@ export type CspOptions = {
 const WALLETCONNECT_HTTPS = ["https://*.walletconnect.com", "https://*.walletconnect.org"];
 const WALLETCONNECT_SOCKETS = ["wss://*.walletconnect.com", "wss://*.walletconnect.org"];
 
-const SEPOLIA_RPC_DEFAULT = "https://ethereum-sepolia-rpc.publicnode.com";
+const SEPOLIA_RPC_DEFAULT = "https://sepolia.gateway.tenderly.co";
 
 /** The Sepolia RPC origin, allowed only when the app is built for Sepolia. */
 function sepoliaOrigins(): string[] {
