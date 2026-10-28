@@ -354,7 +354,13 @@ function SwapForm({ router, tokens, initialFrom, initialTo }: SwapFormProps) {
   );
 }
 
-export function SwapPanel() {
+type SwapPanelProps = {
+  /** Optional symbols from the page address, such as ?from=LUNA&to=TERR. */
+  readonly fromSymbol?: string | undefined;
+  readonly toSymbol?: string | undefined;
+};
+
+export function SwapPanel({ fromSymbol, toSymbol }: SwapPanelProps = {}) {
   const { deployment, tokens } = MARKET;
   const first = tokens[0];
   const second = tokens[1];
@@ -366,12 +372,22 @@ export function SwapPanel() {
       </p>
     );
   }
+  const bySymbol = (symbol: string | undefined): TokenConfig | undefined =>
+    symbol === undefined
+      ? undefined
+      : tokens.find((token) => token.symbol.toUpperCase() === symbol.toUpperCase());
+  const start = bySymbol(fromSymbol) ?? first;
+  let end = bySymbol(toSymbol) ?? second;
+  if (end.address === start.address) {
+    end = tokens.find((token) => token.address !== start.address) ?? second;
+  }
   return (
     <SwapForm
+      key={`${start.address}-${end.address}`}
       router={deployment.router}
       tokens={tokens}
-      initialFrom={first.address}
-      initialTo={second.address}
+      initialFrom={start.address}
+      initialTo={end.address}
     />
   );
 }
