@@ -21,7 +21,7 @@ export function TopBar() {
   return (
     <header className="sticky top-0 z-20 border-b border-line bg-bg">
       <div className="px-4 sm:px-6">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-8 gap-y-3 py-3">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-4 gap-y-3 py-3 lg:flex-nowrap xl:gap-x-8">
           <Link
             href="/"
             aria-label={`${APP_NAME} home`}
@@ -36,7 +36,7 @@ export function TopBar() {
             </span>
           </Link>
 
-          <nav aria-label="Primary" className="flex items-end gap-1">
+          <nav aria-label="Primary" className="flex shrink-0 items-end gap-1">
             {NAV_ITEMS.map((item) => {
               const active = isActive(pathname, item.href);
               return (
@@ -55,11 +55,11 @@ export function TopBar() {
             })}
           </nav>
 
-          <div className="min-w-[220px] flex-1 lg:max-w-sm">
+          <div className="min-w-[200px] flex-1 lg:min-w-[140px] lg:max-w-sm">
             <SearchBox />
           </div>
 
-          <div className="ml-auto flex items-center gap-6">
+          <div className="ml-auto flex shrink-0 items-center gap-4 xl:gap-6">
             <TotalTvl />
             <ConnectButton />
           </div>
