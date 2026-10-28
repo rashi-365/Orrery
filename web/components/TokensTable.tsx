@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import Link from "next/link";
 import type { Address } from "viem";
 import { shortAddress } from "@/lib/format";
 import { getMarket } from "@/lib/market";
@@ -21,7 +22,12 @@ const COLUMNS: readonly Column<TokenRow>[] = [
     label: "Symbol",
     sortValue: (row) => row.symbol,
     cell: (row) => (
-      <span className="font-sans font-semibold uppercase tracking-label text-text">{row.symbol}</span>
+      <Link
+        href={`/tokens/${row.symbol}`}
+        className="font-sans font-semibold uppercase tracking-label text-text hover:text-accent"
+      >
+        {row.symbol}
+      </Link>
     ),
   },
   {
